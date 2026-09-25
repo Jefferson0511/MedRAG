@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Raw source documents (copyrighted guideline PDFs stay local; list sources in data/SOURCES.md)
+data/raw/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

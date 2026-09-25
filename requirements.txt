@@ -1,0 +1,3 @@
+# Day 1: only what we need today. LangChain gets added on Day 3.
+psycopg[binary]
+python-dotenv

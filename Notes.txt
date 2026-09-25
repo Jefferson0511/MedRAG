@@ -1,0 +1,11 @@
+Progress:
+
+Day 1:
+- What is langchain?
+    -python library that gives standardised building blocks for LLM pipelines
+    -So that we dont write direct HTTP calls to OpenAIs embedding endpoint.
+    -Basically a toolbox built of swappable pieces
+
+- Why langchain here?
+    - without it we would have to handwrite PDF parsing and handwrite API calls to embedding model. 
+    - using lanchain just means less boilerplate and fewer places to introduce bugs
