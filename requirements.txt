@@ -1,3 +1,8 @@
-# Day 1: only what we need today. LangChain gets added on Day 3.
+# Day 1: db
 psycopg[binary]
 python-dotenv
+
+#Day 3: Loading+ Chunking
+langchain-core==1.6.6
+langchain-text-splitters==1.1.2
+pypdf==6.19.0
