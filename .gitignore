@@ -8,8 +8,14 @@ __pycache__/
 
 # Raw source documents (copyrighted guideline PDFs stay local; list sources in data/SOURCES.md)
 data/raw/
+# Held-out source docs (kept out of the static corpus on purpose, e.g. to verify live-tool answers)
+data/holdout/
 
 # OS / editor
 .DS_Store
 .vscode/
 .idea/
+
+#Claude code
+.claude/
+CLAUDE.md
