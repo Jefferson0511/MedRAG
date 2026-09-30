@@ -6,3 +6,6 @@ python-dotenv
 langchain-core==1.6.6
 langchain-text-splitters==1.1.2
 pypdf==6.19.0
+
+# Day 4: embeddings (text-embedding-3-small)
+langchain-openai==1.6.6
