@@ -9,3 +9,7 @@ pypdf==6.19.0
 
 # Day 4: embeddings (text-embedding-3-small)
 langchain-openai==1.6.6
+
+# Day 4: vector store (PGVectorStore; asyncpg because psycopg async can't use Windows' default event loop)
+langchain-postgres==0.0.18
+asyncpg==0.31.0
