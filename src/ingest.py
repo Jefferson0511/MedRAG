@@ -1,54 +1,24 @@
 """Index the corpus: load -> chunk -> estimate cost -> embed -> store in pgvector.
 
 Rebuilds the table from scratch on every run, so the database always matches the current
-loader and chunker. The table name includes the embedding model, because vectors from
-different models live in different spaces and must never share a table.
+loader and chunker. Model, table, and connection settings live in vectorstore.py.
 """
-import os
 import uuid
 from pathlib import Path
-from urllib.parse import quote_plus
 
 import tiktoken
 from dotenv import load_dotenv
 from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
-from langchain_postgres import Column, PGEngine, PGVectorStore
+from langchain_postgres import PGEngine, PGVectorStore
 
 from chunker import chunk_documents
 from loader import load_corpus
+from vectorstore import EMBEDDING_MODEL, METADATA_COLUMNS, TABLE_NAME, VECTOR_SIZE, connection_url, open_store
 
-EMBEDDING_MODEL = "text-embedding-3-small"
-VECTOR_SIZE = 1536  # must match the model's output length exactly; pgvector rejects anything else
-TABLE_NAME = "chunks_te3small"
 PRICE_PER_MILLION_TOKENS = 0.02  # USD, checked on OpenAI's model page on 2026-09-29
-
-# Metadata stored as real Postgres columns (fast filtering, readable with plain SQL).
-METADATA_COLUMNS = [
-    Column("source", "TEXT"),
-    Column("org", "TEXT"),
-    Column("title", "TEXT"),
-    Column("section_category", "TEXT"),
-    Column("section_heading", "TEXT"),
-    Column("header", "TEXT"),
-    Column("chunk_index", "INTEGER"),
-    Column("start_index", "INTEGER"),
-    Column("page_start", "INTEGER"),
-    Column("page_end", "INTEGER"),
-]
 
 # Q4 from the eval spec, used as a smoke test after indexing.
 SMOKE_TEST_QUERY = "What is the recommended timing for the first prenatal visit per ACOG?"
-
-
-def connection_url() -> str:
-    """Postgres URL for SQLAlchemy, built from the same .env values as scripts/check_db.py."""
-    # +asyncpg: PGEngine runs async internally even for *_sync calls, and psycopg's async mode can't use
-    # Windows' default ProactorEventLoop. asyncpg can. quote_plus escapes characters like @ or / in the password.
-    return (
-        f"postgresql+asyncpg://{os.getenv('POSTGRES_USER')}:{quote_plus(os.getenv('POSTGRES_PASSWORD', ''))}"
-        f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-    )
 
 
 def chunk_id(chunk: Document) -> str:
@@ -74,12 +44,7 @@ def build_store(chunks: list[Document]) -> PGVectorStore:
         metadata_columns=METADATA_COLUMNS,
         overwrite_existing=True,  # drop and rebuild: the DB always matches the current code
     )
-    store = PGVectorStore.create_sync(
-        engine=engine,
-        table_name=TABLE_NAME,
-        embedding_service=OpenAIEmbeddings(model=EMBEDDING_MODEL),
-        metadata_columns=[column.name for column in METADATA_COLUMNS],  # which metadata keys map to columns
-    )
+    store = open_store(engine)
     # embeds in batches via embed_documents, then inserts one row per chunk
     store.add_documents(chunks, ids=[chunk_id(chunk) for chunk in chunks])
     return store
@@ -100,4 +65,4 @@ if __name__ == "__main__":
     print(f"Smoke test (Q4): {SMOKE_TEST_QUERY}")
     for rank, (doc, score) in enumerate(store.similarity_search_with_score(SMOKE_TEST_QUERY, k=5), start=1):
         meta = doc.metadata
-        print(f"  #{rank} score={score:.4f} | {meta['header']} | pages {meta['page_start']}-{meta['page_end']}")
+        print(f"  #{rank} distance={score:.4f} | {meta['header']} | pages {meta['page_start']}-{meta['page_end']}")
