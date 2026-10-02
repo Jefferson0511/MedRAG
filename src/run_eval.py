@@ -29,7 +29,9 @@ ESTIMATED_USD_PER_CALL = 0.003  # from the first runs: ~750 input + ~50-240 outp
 def git_state() -> tuple[str, bool]:
     """(commit hash, dirty?) so every result records which code produced it."""
     commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
-    dirty = bool(subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True).stdout.strip())
+    # untracked files (like results/ itself) don't change the code that ran, so they don't count as dirty
+    dirty = bool(subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"],
+                                capture_output=True, text=True).stdout.strip())
     return commit, dirty
 
 
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         print("WARNING: uncommitted changes; these results won't be reproducible from a commit.")
     calls = len(questions) * args.runs
     answer = input(f"Run {len(questions)} questions x {args.runs} runs = {calls} calls "
-                   f"(about ${calls * ESTIMATED_USD_PER_CALL:.2f})? [y/N] ")
+                   f"(about ${calls * ESTIMATED_USD_PER_CALL:.3f})? [y/N] ")
     if answer.strip().lower() != "y":
         raise SystemExit("Cancelled, nothing was run.")
 
