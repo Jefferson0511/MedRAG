@@ -18,7 +18,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
-from agent import MODEL_PRICES, RESPONDER_MODEL, build_graph
+from agent import MODEL_PRICES, RESPONDER_MODEL, TOP_K, build_graph
 from retrieve import load_eval_questions
 from vectorstore import open_store
 
@@ -78,7 +78,12 @@ if __name__ == "__main__":
     parser.add_argument("--runs", type=int, default=3, help="runs per question (temperature can't be fixed)")
     parser.add_argument("--q", type=int, nargs="*", help="only these question numbers (default: all concrete)")
     parser.add_argument("--label", default="baseline", help="name for this configuration, used in the filename")
+    parser.add_argument("--rewrite", action="store_true", help="add the plan node (query rewriting)")
+    parser.add_argument("--per-publisher", action="store_true", help="per-publisher retrieval when 2+ are named")
+    parser.add_argument("--k", type=int, default=TOP_K, help=f"chunks given to the responder (default {TOP_K})")
     args = parser.parse_args()
+    # recorded in every record, so each result can be traced to the exact configuration that produced it
+    config = {"rewrite": args.rewrite, "per_publisher": args.per_publisher, "top_k": args.k}
 
     load_dotenv()
     questions = load_eval_questions()
@@ -94,7 +99,8 @@ if __name__ == "__main__":
     if answer.strip().lower() != "y":
         raise SystemExit("Cancelled, nothing was run.")
 
-    graph = build_graph(open_store(), ChatOpenAI(model=RESPONDER_MODEL))
+    graph = build_graph(open_store(), ChatOpenAI(model=RESPONDER_MODEL),
+                        rewrite=args.rewrite, per_publisher=args.per_publisher, top_k=args.k)
     RESULTS_DIR.mkdir(exist_ok=True)
     started = datetime.now(timezone.utc)
     out_path = RESULTS_DIR / f"{args.label}_{started.strftime('%Y%m%dT%H%M%SZ')}.jsonl"
@@ -105,7 +111,8 @@ if __name__ == "__main__":
             for run_index in range(1, args.runs + 1):
                 record = {
                     "run_label": args.label, "question_id": number, "run_index": run_index,
-                    "question": question, "model": RESPONDER_MODEL,
+                    "question": question, "model": RESPONDER_MODEL, "config": config,
+                    "search_query": None, "publishers": None,
                     "git_commit": commit, "git_dirty": dirty,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "answer": None, "retrieved": [], "usage": [], "cost_usd": 0.0, "latency_s": None, "error": None,
@@ -115,6 +122,8 @@ if __name__ == "__main__":
                     state = graph.invoke({"question": question, "usage": []})
                     record.update(
                         answer=state["answer"],
+                        search_query=state.get("search_query"),  # what retrieval actually searched for
+                        publishers=state.get("publishers"),
                         retrieved=retrieved_metadata(state["retrieved"]),
                         usage=state["usage"],
                         cost_usd=round(cost_usd(state["usage"]), 6),
