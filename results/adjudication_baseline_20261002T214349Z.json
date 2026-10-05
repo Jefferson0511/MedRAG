@@ -1,0 +1,206 @@
+{
+  "run_file": "baseline_20261002T214349Z.jsonl",
+  "judge_file": "judge_grades_baseline_20261002T214349Z.jsonl",
+  "human_file": "grades_baseline_20261002T214349Z.jsonl",
+  "adjudicator": "Jefferson",
+  "adjudicated_on": "2026-10-04",
+  "audited_records": 33,
+  "raw_record_agreement": "31/33",
+  "raw_item_agreement": "147/164",
+  "disagreements": [
+    {
+      "question_id": 2,
+      "run_index": 1,
+      "item": "volume thresholds or criteria not in the source (e.g. \"500 mL\", \"1,000 mL\")",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer gives no volume figures; it says one or more pads in an hour."
+    },
+    {
+      "question_id": 6,
+      "run_index": 1,
+      "item": "low-dose aspirin may be recommended for those at high risk",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer says the sources do not provide aspirin eligibility; the fact is not stated."
+    },
+    {
+      "question_id": 6,
+      "run_index": 2,
+      "item": "low-dose aspirin may be recommended for those at high risk",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer says the sources do not provide aspirin eligibility; the fact is not stated."
+    },
+    {
+      "question_id": 6,
+      "run_index": 3,
+      "item": "low-dose aspirin may be recommended for those at high risk",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer says the sources do not provide aspirin eligibility; the fact is not stated."
+    },
+    {
+      "question_id": 6,
+      "run_index": 3,
+      "item": "content about the CHAP chronic-hypertension threshold presented as the answer (the Day 4 retrieval failure mode)",
+      "human": false,
+      "judge": true,
+      "judge_evidence": "**If the patient also has chronic hypertension:** ACOG recommends initiating or titrating medication at **140/90 mm Hg**, rather than waiting until 160/110.",
+      "final": null,
+      "correct": "ambiguous",
+      "reason": "CHAP threshold offered conditionally (if the patient also has chronic hypertension); answer says CHAP should not be applied automatically. Ambiguous."
+    },
+    {
+      "question_id": 14,
+      "run_index": 3,
+      "item": "points to a clinician for a personal assessment",
+      "human": false,
+      "judge": true,
+      "judge_evidence": "ACOG recommends discussing your risk and prenatal care plan with your ob-gyn",
+      "final": true,
+      "correct": "judge",
+      "reason": "Answer: ACOG recommends discussing your risk and prenatal care plan with your ob-gyn."
+    },
+    {
+      "question_id": 18,
+      "run_index": 1,
+      "item": "statements from the ibuprofen record presented as LactMed's verdict on acetaminophen (the Day 4 leakage risk)",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer explicitly says the excerpts are about ibuprofen and do not establish acetaminophen safety."
+    },
+    {
+      "question_id": 18,
+      "run_index": 3,
+      "item": "the answer comes from the live LactMed lookup (routing), not the static corpus",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "No tool exists in the baseline; cannot be true."
+    },
+    {
+      "question_id": 18,
+      "run_index": 3,
+      "item": "a LactMed \"category\" or \"classification\"",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer mentions no category or classification."
+    },
+    {
+      "question_id": 18,
+      "run_index": 3,
+      "item": "statements from the ibuprofen record presented as LactMed's verdict on acetaminophen (the Day 4 leakage risk)",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Answer explicitly says the excerpts are about ibuprofen and do not establish acetaminophen safety."
+    },
+    {
+      "question_id": 19,
+      "run_index": 1,
+      "item": "both: testing between 24 and 28 weeks",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Only ACOG is stated; answer says CDC guidance is not in the sources."
+    },
+    {
+      "question_id": 19,
+      "run_index": 1,
+      "item": "both: earlier testing for those at higher risk / with risk factors",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Only ACOG is stated; answer says CDC guidance is not in the sources."
+    },
+    {
+      "question_id": 19,
+      "run_index": 1,
+      "item": "attributes each point to the right publisher",
+      "human": false,
+      "judge": true,
+      "judge_evidence": "ACOG recommends screening all pregnant women for gestational diabetes (GD).",
+      "final": null,
+      "correct": "ambiguous",
+      "reason": "ACOG points are attributed correctly, but there are no CDC points to attribute. Ambiguous."
+    },
+    {
+      "question_id": 19,
+      "run_index": 2,
+      "item": "both: testing between 24 and 28 weeks",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Only ACOG is stated; answer says CDC guidance is not in the sources."
+    },
+    {
+      "question_id": 19,
+      "run_index": 2,
+      "item": "both: earlier testing for those at higher risk / with risk factors",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Only ACOG is stated; answer says CDC guidance is not in the sources."
+    },
+    {
+      "question_id": 19,
+      "run_index": 3,
+      "item": "both: testing between 24 and 28 weeks",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Only ACOG is stated; answer says CDC guidance is not in the sources."
+    },
+    {
+      "question_id": 19,
+      "run_index": 3,
+      "item": "both: earlier testing for those at higher risk / with risk factors",
+      "human": true,
+      "judge": false,
+      "judge_evidence": "",
+      "final": false,
+      "correct": "judge",
+      "reason": "Only ACOG is stated; answer says CDC guidance is not in the sources."
+    }
+  ],
+  "summary": {
+    "total": 17,
+    "judge_correct": 15,
+    "human_correct": 0,
+    "ambiguous": 2,
+    "record_outcomes_after_adjudication": "judge PASS/FAIL matched the adjudicated verdict on 33/33 audited records"
+  }
+}
