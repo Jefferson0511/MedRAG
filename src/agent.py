@@ -30,6 +30,8 @@ TOP_K = 5
 # USD per 1M (input, output) tokens. One table, so every cost number comes from the same place.
 MODEL_PRICES = {
     "gpt-6.1-sol": (2.00, 10.00),  # OpenAI models page, checked 2026-10-02
+    "gpt-6-astra": (10.00, 50.00),  # OpenAI models page, checked 2026-10-02
+    "claude-opus-5-5": (4.00, 20.00),  # Anthropic model table, checked 2026-10-04 (Accuracy judge)
 }
 
 # Baseline prompt: answer from sources and cite them. It does NOT tell the model to refuse when

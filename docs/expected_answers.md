@@ -22,15 +22,17 @@ What is the recommended folic acid dosage for pregnant patients per CDC guidance
 - **Required facts:**
   - [ ] 400 mcg (micrograms) of folic acid daily
   - [ ] continue taking it during pregnancy (and start before conception, at least 1 month before)
-- **Optional facts:** the recommendation applies to all women capable of becoming pregnant; prevents neural tube defects (NTDs)
-- **Must NOT contain:** a different daily dose stated as CDC's recommendation (e.g. 4 mg / 4,000 mcg); a dose attributed to ACOG (this source is CDC)
+- **Optional facts:** the recommendation applies to all women capable of becoming pregnant; prevents neural tube defects (NTDs); after a past pregnancy with an NTD, CDC's recommendation is 4,000 mcg daily (start 1 month before becoming pregnant again, continue through the first 3 months, talk with a doctor first)
+- **Must NOT contain:** a dose other than 400 mcg stated as the general recommendation for pregnant patients (4,000 mcg is correct ONLY for the past-NTD-pregnancy case); a dose attributed to ACOG (this source is CDC)
 - **Source evidence:**
   - `cdc/cdc_folic_acid.pdf`, p.1, KEY POINTS: "All women capable of becoming pregnant should get 400 micrograms (mcg) of folic acid daily."
   - `cdc/cdc_folic_acid.pdf`, p.3, What you can do: "If you're thinking about becoming pregnant, start taking folic acid at least 1 month before conception. Continue taking folic acid during pregnancy."
   - `cdc/cdc_folic_acid.pdf`, p.1, KEY POINTS: "Getting 400 mcg of folic acid daily can help prevent serious birth defects called neural tube defects."
+  - `cdc/cdc_folic_acid.pdf`, p.2: "If you had a past pregnancy with an NTD and you're planning to become pregnant again, talk with your doctor first. The current recommendation is to get 4,000 mcg of folic acid every day."
 - **Note:** the question says "pregnant patients" but CDC's recommendation targets all women capable of becoming pregnant. A good answer reflects the source's framing.
-- **Status:** Verified
-- **Verified:** Jefferson, 2026-10-01
+- **Revision (2026-10-02):** the original Must NOT item ("a different daily dose stated as CDC's recommendation (e.g. 4 mg / 4,000 mcg)") was wrong: the source itself recommends 4,000 mcg after a past NTD pregnancy (p.2). Found while grading baseline Q1 run 1, whose answer stated this correctly with a citation. Corrected from the source text, not from the agent's output; the 4,000 mcg case moved to Optional facts and the Must NOT item narrowed to misstating the general dose.
+- **Status:** Verified (re-verified after the 2026-10-02 revision)
+- **Verified:** Jefferson, 2026-10-02
 
 ## Q2 (Factual)
 According to CDC guidance, what are the warning signs of postpartum hemorrhage?
