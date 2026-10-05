@@ -16,3 +16,6 @@ asyncpg==0.31.0
 
 # Week 2: agent graph
 langgraph==1.2.12
+
+# Week 2: Accuracy judge (Claude, official SDK)
+anthropic==1.11.0
