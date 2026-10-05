@@ -142,6 +142,8 @@ if __name__ == "__main__":
     parser.add_argument("--audit", type=Path, help="judge grades file: grade only the audit subset, blind")
     parser.add_argument("--sample", type=int, default=1, help="random judge PASSes per question to audit")
     parser.add_argument("--seed", type=int, default=42, help="seed for the audit sample (fixed = reproducible)")
+    parser.add_argument("--records", nargs="*", metavar="Q:RUN",
+                        help="audit only these records, e.g. 2:1 19:1 (overrides the stratified sample)")
     args = parser.parse_args()
 
     answer_key = load_answer_key()
@@ -149,7 +151,10 @@ if __name__ == "__main__":
     gradable = [r for r in records if r["question_id"] in answer_key and not r["error"]]
     judge = load_judge_grades(args.audit) if args.audit else {}
     if args.audit:
-        selection = audit_selection(judge, args.sample, args.seed)
+        if args.records:  # targeted audit, e.g. only the records whose verdict changed between runs
+            selection = {tuple(int(part) for part in item.split(":")) for item in args.records}
+        else:
+            selection = audit_selection(judge, args.sample, args.seed)
         gradable = [r for r in gradable if (r["question_id"], r["run_index"]) in selection]
 
     grades_path = args.run_file.with_name(f"grades_{args.run_file.stem}.jsonl")
