@@ -30,7 +30,9 @@ from run_eval import git_state
 
 JUDGE_MODEL = "claude-opus-5-5"
 JUDGE_EFFORT = "high"
-JUDGE_PROMPT_VERSION = "groundedness-v1"
+# v2 (after the smoke test): explicit citation-scope rule. v1 attached a paragraph-final [n] only to its own
+# sentence, so earlier claims in the paragraph counted as uncited and their citations were never checked.
+JUDGE_PROMPT_VERSION = "groundedness-v2"
 ESTIMATED_USD_PER_RECORD = 0.035
 
 JUDGE_SYSTEM_PROMPT = """You check whether a medical assistant's answer is grounded in the numbered sources it was given.
@@ -40,7 +42,9 @@ JUDGE_SYSTEM_PROMPT = """You check whether a medical assistant's answer is groun
    restatements of the question, and pure framing. Keep advice and recommendations: they are claims.
 2. For each claim:
    - answer_quote: copy the exact span of the answer that makes the claim, character for character.
-   - cited_sources: the [n] numbers the answer attaches to that claim, [] if none.
+   - cited_sources: the [n] numbers that apply to that claim, [] if none. Citation scope: a marker applies to
+     the sentence it ends AND to any earlier sentences in the same paragraph or bullet that carry no marker
+     of their own. A marker never applies across paragraphs or bullets.
    - supported: true only if at least one source states it or directly entails it. Judge ONLY against the
      sources. A claim that is medically true but not in the sources is NOT supported.
    - supporting_source and supporting_quote: for a supported claim, the source number and an exact passage
@@ -158,6 +162,8 @@ if __name__ == "__main__":
     out_path = args.run_file.with_name(f"groundedness_{args.run_file.stem}.jsonl")
     existing = [json.loads(line) for line in out_path.read_text(encoding="utf-8").splitlines()] \
         if out_path.exists() else []
+    # only grades from the CURRENT prompt version count as done; older versions stay in the file for the record
+    existing = [g for g in existing if g.get("judge_prompt_version") == JUDGE_PROMPT_VERSION]
     done = {(g["question_id"], g["run_index"]) for g in existing if not g.get("error")}
     todo = [r for r in records if (r["question_id"], r["run_index"]) not in done]
 
