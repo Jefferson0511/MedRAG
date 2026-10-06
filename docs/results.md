@@ -119,6 +119,45 @@ the Run 1 audit (same judge, prompt, and answer key). Adjudication: `results/adj
 
 ---
 
+## Groundedness (Runs 1 and 2) — UNAUDITED
+
+- **Method:** `src/judge_groundedness.py` (judge `claude-opus-5-5`, effort high, prompt `groundedness-v2`). The judge
+  splits each answer into atomic factual claims and marks each one **supported** (backed by any retrieved source)
+  and, if it carries a citation, **cited_supports** (backed by a cited source). Citation scope: a marker covers its
+  sentence and any earlier unmarked sentences in the same paragraph or bullet. Every supported verdict must quote
+  the source it names; quotes are verified in code (0 unverifiable in both runs). Sources are rebuilt locally
+  from the loader/chunker and checked against recorded headers (108/108 exact).
+- **Prompt history:** v1 attached a paragraph-final citation only to its own sentence, which left earlier claims
+  uncounted; fixed in v2 after the 6-record smoke test, before any full run. Only v2 grades are reported.
+- **Grades:** `results/groundedness_baseline_20261002T214349Z.jsonl`, `results/groundedness_retrieval_v2_20261005T023741Z.jsonl`
+- **Headline metric is binary per answer (zero unsupported claims).** Claim-level rates are supporting only: the judge
+  splits the same answer into different numbers of claims across runs (Q12 run 2: 6 claims under v1, 10 under v2),
+  so their denominators move.
+
+| All 54 answers | Run 1 baseline | Run 2 retrieval v2 |
+|---|---|---|
+| **Answers fully grounded** | **30/54 (56%)** | **34/54 (63%)** |
+| Excluding Q15 (refusals with 0 claims, grounded trivially) | 27/51 | 31/51 |
+| Unsupported claims (supporting) | 76/307 (24.8%) | 59/348 (17.0%) |
+| Citation precision (supporting) | 84.1% | 87.7% |
+
+- **The difference is mostly not attributable.** Only three questions changed: Q19 2/3 -> 3/3 (plausibly real: with
+  CDC's text retrieved, the model no longer speculated about CDC), Q14 0/3 -> 2/3 and Q13 1/3 -> 2/3 (refusal
+  answers where a single unsupported sentence flips the verdict; with 3 runs and variable claim splitting these
+  are indistinguishable from noise). Retrieval v2 should not be credited with improving groundedness.
+- **Where ungrounded content lives: escalation answers.** Q9, Q10, Q11 are fully grounded in 0/3 runs in BOTH
+  runs; Q20 is near 0. The unsupported claims are sensible, safety-oriented emergency instructions that no source
+  contains, some carrying citations to sources that don't say them, e.g. baseline Q11 run 1: "Go to the nearest
+  emergency department", "call emergency services and do not drive yourself", "Tell the medical team: ..." [1];
+  baseline Q12 run 3: "Try getting extra rest, drinking fluids, and eating regularly." [1].
+- **Design implication (for the escalation node):** generate the escalation message from approved source wording
+  (e.g. CDC's "Seek medical care immediately") rather than letting the model write free-form emergency advice.
+  Unsourced advice, however plausible, has no approver.
+- **Pending audit:** borderline judge strictness, e.g. "Seek emergency medical care now" marked unsupported against
+  the source's "Seek medical care immediately".
+
+---
+
 ## Failure log
 
 Format from `docs/eval_harness_spec.md`.
