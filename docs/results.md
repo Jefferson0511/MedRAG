@@ -119,7 +119,7 @@ the Run 1 audit (same judge, prompt, and answer key). Adjudication: `results/adj
 
 ---
 
-## Groundedness (Runs 1 and 2) — UNAUDITED
+## Groundedness (Runs 1 and 2) — audited on a purposive claim sample
 
 - **Method:** `src/judge_groundedness.py` (judge `claude-opus-5-5`, effort high, prompt `groundedness-v2`). The judge
   splits each answer into atomic factual claims and marks each one **supported** (backed by any retrieved source)
@@ -153,8 +153,19 @@ the Run 1 audit (same judge, prompt, and answer key). Adjudication: `results/adj
 - **Design implication (for the escalation node):** generate the escalation message from approved source wording
   (e.g. CDC's "Seek medical care immediately") rather than letting the model write free-form emergency advice.
   Unsourced advice, however plausible, has no approver.
-- **Pending audit:** borderline judge strictness, e.g. "Seek emergency medical care now" marked unsupported against
-  the source's "Seek medical care immediately".
+- **Audit:** `src/audit_groundedness.py`, blind (judge verdicts hidden), by answer (sources shown once, up to 4
+  claims each, seeded sample plus forced inclusion of the borderline "emergency medical care" claim). Selection was
+  PURPOSIVE, not random: 5 answers chosen where the judge was most likely to err (escalation advice, cited-but-
+  unsupported advice, and two answers the judge rated fully supported, to test leniency). 19 claims.
+  Audit file: `results/groundedness_audit.jsonl`.
+  - Raw agreement: supported 17/19 (89%), cited source supports it 16/18 (89%).
+  - Adjudicated: judge correct on both disagreements (Q4 run 1 "timing may vary": supported almost verbatim by
+    source [1], human slip; Q11 run 1 "Tell the medical team: ...": no source mentions telling clinicians anything,
+    so the judge's "unsupported" stands). **Judge matched the adjudicated verdict on 19/19 claims.**
+  - Because the sample is purposive, this is a targeted stress test of the judge, not a random-sample agreement rate.
+  - **Strictness standard confirmed independently:** human and judge both marked "Seek emergency medical care now"
+    unsupported by the source's "Seek medical care immediately". Upgrading "medical care" to "emergency care" adds
+    to the source; in a clinical system the difference between "call your doctor today" and "go to the ER" matters.
 
 ---
 
@@ -207,6 +218,25 @@ Fix applied: top_k 5 -> 8 (Run 2)
 Before: failed 0/3 (Run 1)
 After (re-run): still failed 0/3. The "special tests" chunk is not in the top 8 either; larger k alone does not
   fix it. Next candidate: expanding retrieval to neighboring sections of the same document.
+```
+
+```
+Question ID: Q9, Q10, Q11 (and Q12 run 3, Q20)
+Category: Escalation-critical (groundedness, not accuracy)
+Expected: escalate using what the source says ("Seek medical care immediately"), every claim backed by a source
+Actual: Accuracy passes 3/3 on Q9-Q11 (escalation happens), but 0/3 answers are fully grounded in both runs.
+  The model adds its own operational emergency advice: "Go to the nearest emergency department", "call emergency
+  services and do not drive yourself", "Tell the medical team: ..." [1], "Seek emergency medical care now" [1].
+  Worst pattern, Q12 run 3: "Try getting extra rest, drinking fluids, and eating regularly." [1], advice from no
+  source with a citation attached, so it looks grounded.
+Root cause: Grounding failure (generation, not retrieval)
+  The right chunks are retrieved; the responder elaborates beyond them. Retrieval v2 changed nothing here
+  (0/3 -> 0/3), which confirms it is not a retrieval problem.
+Fix applied: pending (candidates: escalation message built from approved source wording rather than free text;
+  a grounding node that strips or flags unsupported sentences; a responder instruction to add nothing beyond the
+  sources). Measure each against Run 2's groundedness as the "before".
+Before: Q9-Q11 fully grounded 0/9 runs (Run 1) and 0/9 (Run 2)
+After (re-run): pending
 ```
 
 Q18 is not logged as a failure: it fails by design until the Week 4 tool exists.
