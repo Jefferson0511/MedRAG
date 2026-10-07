@@ -51,6 +51,15 @@ RESPONDER_SYSTEM_PROMPT = (
     "Cite the sources you use inline by number, like [1] or [2][3]."
 )
 
+# Fix A (grounded_prompt switch): appended to the responder prompt. Targets the Run 1/2 finding that escalation
+# answers add unsourced emergency instructions ("go to the nearest emergency department", "don't drive yourself").
+GROUNDED_PROMPT_ADDITION = (
+    " Use only the information in the sources. Do not add advice, instructions, explanations, or facts that the "
+    "sources do not contain, even ones that seem safe or helpful. When urging someone to seek care, use the "
+    "sources' own wording rather than your own (for example, do not upgrade 'seek medical care' to 'go to the "
+    "emergency department'). If the sources do not cover something, say so instead of filling the gap."
+)
+
 PLANNER_SYSTEM_PROMPT = """You prepare a user's question for searching an index of maternal and perinatal care guideline excerpts.
 
 search_query: rewrite the question as a search query about its medical CONTENT.
@@ -109,12 +118,14 @@ def build_graph(
     per_publisher: bool = False,
     top_k: int = TOP_K,
     planner_llm: BaseChatModel | None = None,
+    grounded_prompt: bool = False,
 ):
     """Compile the agent graph. Defaults reproduce the baseline. Nodes are closures over store and the
     LLMs, so the eval harness can swap any of them without touching node code."""
     if rewrite and planner_llm is None:
         planner_llm = ChatOpenAI(model=PLANNER_MODEL)
     planner = planner_llm.with_structured_output(Plan, include_raw=True) if rewrite else None
+    responder_prompt = RESPONDER_SYSTEM_PROMPT + (GROUNDED_PROMPT_ADDITION if grounded_prompt else "")
 
     def plan_node(state: AgentState) -> dict:
         response = planner.invoke([SystemMessage(PLANNER_SYSTEM_PROMPT), HumanMessage(state["question"])])
@@ -139,7 +150,7 @@ def build_graph(
     def respond_node(state: AgentState) -> dict:
         # the responder answers the user's ORIGINAL question; the search query is only for retrieval
         message = llm.invoke([
-            SystemMessage(RESPONDER_SYSTEM_PROMPT),
+            SystemMessage(responder_prompt),
             HumanMessage(f"Sources:\n\n{format_sources(state['retrieved'])}\n\nQuestion: {state['question']}"),
         ])
         return {"answer": message.content, "usage": [usage_record("respond", model_name, message)]}
@@ -165,6 +176,7 @@ if __name__ == "__main__":
     parser.add_argument("--rewrite", action="store_true", help="add the plan node (query rewriting)")
     parser.add_argument("--per-publisher", action="store_true", help="per-publisher retrieval when 2+ are named")
     parser.add_argument("--k", type=int, default=TOP_K, help=f"chunks given to the responder (default {TOP_K})")
+    parser.add_argument("--grounded-prompt", action="store_true", help="responder: add nothing beyond the sources")
     args = parser.parse_args()
 
     load_dotenv()
@@ -176,7 +188,8 @@ if __name__ == "__main__":
         parser.error("give a question or --q N")
 
     graph = build_graph(open_store(), ChatOpenAI(model=RESPONDER_MODEL),
-                        rewrite=args.rewrite, per_publisher=args.per_publisher, top_k=args.k)
+                        rewrite=args.rewrite, per_publisher=args.per_publisher, top_k=args.k,
+                        grounded_prompt=args.grounded_prompt)
     final_state = graph.invoke({"question": question, "usage": []})
 
     print(f"Question: {question}")

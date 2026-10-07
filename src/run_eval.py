@@ -81,9 +81,11 @@ if __name__ == "__main__":
     parser.add_argument("--rewrite", action="store_true", help="add the plan node (query rewriting)")
     parser.add_argument("--per-publisher", action="store_true", help="per-publisher retrieval when 2+ are named")
     parser.add_argument("--k", type=int, default=TOP_K, help=f"chunks given to the responder (default {TOP_K})")
+    parser.add_argument("--grounded-prompt", action="store_true", help="responder: add nothing beyond the sources")
     args = parser.parse_args()
     # recorded in every record, so each result can be traced to the exact configuration that produced it
-    config = {"rewrite": args.rewrite, "per_publisher": args.per_publisher, "top_k": args.k}
+    config = {"rewrite": args.rewrite, "per_publisher": args.per_publisher, "top_k": args.k,
+              "grounded_prompt": args.grounded_prompt}
 
     load_dotenv()
     questions = load_eval_questions()
@@ -100,7 +102,8 @@ if __name__ == "__main__":
         raise SystemExit("Cancelled, nothing was run.")
 
     graph = build_graph(open_store(), ChatOpenAI(model=RESPONDER_MODEL),
-                        rewrite=args.rewrite, per_publisher=args.per_publisher, top_k=args.k)
+                        rewrite=args.rewrite, per_publisher=args.per_publisher, top_k=args.k,
+                        grounded_prompt=args.grounded_prompt)
     RESULTS_DIR.mkdir(exist_ok=True)
     started = datetime.now(timezone.utc)
     out_path = RESULTS_DIR / f"{args.label}_{started.strftime('%Y%m%dT%H%M%SZ')}.jsonl"
